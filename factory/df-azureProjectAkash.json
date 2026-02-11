@@ -1,0 +1,9 @@
+{
+	"name": "df-azureProjectAkash",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "da96886c-7118-4852-b1d1-efaf1ede522b",
+		"tenantId": "5f89b967-1ca4-4519-b734-be713700c30f"
+	}
+}
