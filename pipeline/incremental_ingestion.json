@@ -29,15 +29,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "ParquetSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT * \nFROM @{pipeline().parameters.schema}.@{pipeline().parameters.table}\nWHERE @{pipeline().parameters.cdc_col} > '@{activity('last_cdc').output.value[0].cdc}'\n",
+							"type": "Expression"
 						},
-						"formatSettings": {
-							"type": "ParquetReadSettings"
-						}
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"sink": {
 						"type": "ParquetSink",
@@ -60,16 +58,8 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "Parquet_dynamic",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "bronze",
-							"folder": "users",
-							"file": {
-								"value": "@concat(pipeline().parameters.table, ' ',variables('current'))",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "Azuresql",
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
