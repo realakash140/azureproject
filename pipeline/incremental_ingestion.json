@@ -133,9 +133,14 @@
 			{
 				"name": "max_cdc",
 				"type": "Script",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "AzureSQLToLake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -166,7 +171,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "AzureSQLToLake",
+						"activity": "max_cdc",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -187,7 +192,7 @@
 							{
 								"name": "cdc",
 								"value": {
-									"value": "ssfdwaef",
+									"value": "@activity('max_cdc').output.resultSets[0].row[0].cdc",
 									"type": "Expression"
 								}
 							}
@@ -202,22 +207,36 @@
 						}
 					},
 					"sink": {
-						"type": "AzureSqlSink",
-						"writeBehavior": "insert",
-						"sqlWriterUseTableLock": false
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
 					},
 					"enableStaging": false
 				},
 				"inputs": [
 					{
 						"referenceName": "Json_dyna",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "bronze",
+							"folder": "cdc",
+							"file": "empty.json"
+						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "Azuresql",
-						"type": "DatasetReference"
+						"referenceName": "Json_dyna",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "bronze",
+							"folder": "cdc",
+							"file": "cdc.json"
+						}
 					}
 				]
 			}
