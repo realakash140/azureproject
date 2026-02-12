@@ -67,7 +67,7 @@
 						"referenceName": "Parquet_dynamic",
 						"type": "DatasetReference",
 						"parameters": {
-							"container": "bronze ",
+							"container": "bronze",
 							"folder": "users",
 							"file": {
 								"value": "@concat(pipeline().parameters.table, '_',variables('current'))",
@@ -133,6 +133,8 @@
 			{
 				"name": "max_cdc",
 				"type": "Script",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -162,7 +164,14 @@
 			{
 				"name": "updated_last_cdc",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "AzureSQLToLake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -178,7 +187,7 @@
 							{
 								"name": "cdc",
 								"value": {
-									"value": "@activity('max_cdc').output.resultSets[0].rows[0].cdc\n",
+									"value": "ssfdwaef",
 									"type": "Expression"
 								}
 							}
@@ -202,12 +211,7 @@
 				"inputs": [
 					{
 						"referenceName": "Json_dyna",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "bronze",
-							"folder": "cdc",
-							"file": "cdc.json"
-						}
+						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
