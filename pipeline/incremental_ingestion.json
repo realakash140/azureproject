@@ -133,14 +133,7 @@
 			{
 				"name": "max_cdc",
 				"type": "Script",
-				"dependsOn": [
-					{
-						"activity": "AzureSQLToLake",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -169,14 +162,7 @@
 			{
 				"name": "updated_last_cdc",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "max_cdc",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
@@ -220,7 +206,7 @@
 						"parameters": {
 							"container": "bronze",
 							"folder": "cdc",
-							"file": "empty.json"
+							"file": "cdc.json"
 						}
 					}
 				],
