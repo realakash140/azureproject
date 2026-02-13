@@ -68,7 +68,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"container": "bronze",
-							"folder": "users",
+							"folder": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							},
 							"file": {
 								"value": "@concat(pipeline().parameters.table, '_',variables('current'))",
 								"type": "Expression"
@@ -131,8 +134,8 @@
 				}
 			},
 			{
-				"name": "max_cdc",
-				"type": "Script",
+				"name": "IfIncrementalData",
+				"type": "IfCondition",
 				"dependsOn": [
 					{
 						"activity": "AzureSQLToLake",
@@ -141,105 +144,157 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
-				"linkedServiceName": {
-					"referenceName": "AzureSql",
-					"type": "LinkedServiceReference"
-				},
 				"typeProperties": {
-					"scripts": [
+					"expression": {
+						"value": "@greater(activity('AzureSQLToLake').output.dataRead,0 )",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
 						{
-							"type": "Query",
-							"text": {
-								"value": "SELECT MAX(@{pipeline().parameters.cdc_col}) AS cdc\nFROM @{pipeline().parameters.schema}.@{pipeline().parameters.table}\n",
-								"type": "Expression"
+							"name": "DeleteEmptyFile",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "Parquet_dynamic",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "bronze",
+										"folder": {
+											"value": "@pipeline().parameters.table",
+											"type": "Expression"
+										},
+										"file": {
+											"value": "@concat(pipeline().parameters.table, '_', variables('current'))\n",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
 							}
 						}
 					],
-					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
-				"name": "updated_last_cdc",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "max_cdc",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "JsonSource",
-						"additionalColumns": [
-							{
-								"name": "cdc",
-								"value": {
-									"value": "@activity('max_cdc').output.resultSets[0].rows[0].cdc\n",
-									"type": "Expression"
-								}
+					"ifTrueActivities": [
+						{
+							"name": "max_cdc_copy1",
+							"type": "Script",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "AzureSql",
+								"type": "LinkedServiceReference"
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": {
+											"value": "SELECT MAX(@{pipeline().parameters.cdc_col}) AS cdc\nFROM @{pipeline().parameters.schema}.@{pipeline().parameters.table}\n",
+											"type": "Expression"
+										}
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
 							}
-						],
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
-							"enablePartitionDiscovery": false
 						},
-						"formatSettings": {
-							"type": "JsonReadSettings"
+						{
+							"name": "updated_last_cdc_copy1",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "max_cdc_copy1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "JsonSource",
+									"additionalColumns": [
+										{
+											"name": "cdc",
+											"value": {
+												"value": "@activity('max_cdc_copy1').output.resultSets[0].rows[0].cdc\n",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "JsonReadSettings"
+									}
+								},
+								"sink": {
+									"type": "JsonSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "FlattenHierarchy"
+									},
+									"formatSettings": {
+										"type": "JsonWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "Json_dyna",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "bronze",
+										"folder": "cdc",
+										"file": "empty.json"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Json_dyna",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": "bronze",
+										"folder": "cdc",
+										"file": "cdc.json"
+									}
+								}
+							]
 						}
-					},
-					"sink": {
-						"type": "JsonSink",
-						"storeSettings": {
-							"type": "AzureBlobFSWriteSettings",
-							"copyBehavior": "FlattenHierarchy"
-						},
-						"formatSettings": {
-							"type": "JsonWriteSettings"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "Json_dyna",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "bronze",
-							"folder": "cdc",
-							"file": "empty.json"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "Json_dyna",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "bronze",
-							"folder": "cdc",
-							"file": "cdc.json"
-						}
-					}
-				]
+					]
+				}
 			}
 		],
 		"parameters": {
