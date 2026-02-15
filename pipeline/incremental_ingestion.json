@@ -31,7 +31,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT *\nFROM @{pipeline().parameters.schema}\n\n.@{pipeline().parameters.table}\nWHERE @{pipeline().parameters.cdc_col} >'@{if(empty(pipeline().parameters.from_date)\n,activity('last_cdc').output.value[0].cdc,pipeline().parameters.from_date)}'",
+							"value": "SELECT *\nFROM @{pipeline().parameters.schema}.@{pipeline().parameters.table}\nWHERE @{pipeline().parameters.cdc_col} >\n'@{activity('last_cdc').output.value[0].cdc}'\n",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -109,7 +109,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"container": "bronze",
-							"folder": "cdc",
+							"folder": {
+								"value": "@pipeline().parameters.table",
+								"type": "Expression"
+							},
 							"file": "cdc.json"
 						}
 					},
@@ -244,7 +247,7 @@
 										{
 											"name": "cdc",
 											"value": {
-												"value": "@activity('max_cdc_copy1').output.resultSets[0].rows[0].cdc\n",
+												"value": "@activity('max_cdc_copy1').output.resultSets[0].rows[0].cdc",
 												"type": "Expression"
 											}
 										}
@@ -276,7 +279,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"container": "bronze",
-										"folder": "cdc",
+										"folder": {
+											"value": "@pipeline().parameters.table",
+											"type": "Expression"
+										},
 										"file": "empty.json"
 									}
 								}
@@ -287,7 +293,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"container": "bronze",
-										"folder": "cdc",
+										"folder": {
+											"value": "@pipeline().parameters.table",
+											"type": "Expression"
+										},
 										"file": "cdc.json"
 									}
 								}
