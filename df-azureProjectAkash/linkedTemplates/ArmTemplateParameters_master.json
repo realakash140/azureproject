@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "df-azureProjectAkash"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"AzureSql_password": {
+			"value": ""
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://akashdeltalake.dfs.core.windows.net/"
+		},
+		"AzureSql_properties_typeProperties_server": {
+			"value": "serverazureakash.database.windows.net"
+		},
+		"AzureSql_properties_typeProperties_database": {
+			"value": "dbazureakash"
+		},
+		"AzureSql_properties_typeProperties_userName": {
+			"value": "adminakash"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
