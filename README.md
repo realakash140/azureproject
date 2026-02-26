@@ -1,6 +1,6 @@
 ## 🥉 Bronze Layer – Incremental Ingestion
 
-this pipeline loads data incrementally from Azure SQL to ADLS Bronze layer using a CDC watermark mechanism.-
+This pipeline loads data incrementally from Azure SQL to ADLS Bronze layer using a CDC watermark mechanism.-
 
 ### Flow:
 Lookup (last_cdc)  
