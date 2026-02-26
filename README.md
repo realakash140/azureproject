@@ -92,5 +92,47 @@ Tables:
 ✔ Delta optimized  
 ✔ Ready for Gold layer
 
+## 🥇 Gold Layer – Incremental + SCD Type 2
+
+The Gold layer builds business-ready dimension tables using incremental processing and SCD Type 2 logic.
+
+### What Happens in This Layer
+
+1. Data is read from Silver tables.
+2. Only new or updated records are selected using timestamp-based incremental filtering.
+3. A Delta `MERGE` statement is executed.
+4. If a record has changed:
+   - Old version is marked inactive (`is_current = false`)
+   - New version is inserted
+5. If the record is new:
+   - It is inserted directly.
+
+---
+
+### Incremental Behavior Observed
+
+- First run: 500 records processed.
+- After new data was added (total 505 in Silver),
+- Only 5 new/changed records were processed in Gold.
+
+This confirms that:
+
+- No full reload was performed
+- Only delta changes were merged
+- Historical records were preserved
+
+---
+
+### Result
+
+✔ Incremental load  
+✔ SCD Type 2 implemented  
+✔ History maintained  
+✔ Efficient Delta MERGE processing  
+✔ Business-ready dimension tables  
+<img width="977" height="789" alt="image" src="https://github.com/user-attachments/assets/09380d36-d34e-40c6-8d34-0dded83d6e1f" />
+
+
+
 
 
