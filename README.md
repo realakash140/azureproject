@@ -1,6 +1,6 @@
 ## 🥉 Bronze Layer – Incremental Ingestion
 
-# this pipeline loads data incrementally from Azure SQL to ADLS Bronze layer using a CDC watermark mechanism.-
+this pipeline loads data incrementally from Azure SQL to ADLS Bronze layer using a CDC watermark mechanism.-
 
 ### Flow:
 Lookup (last_cdc)  
@@ -24,7 +24,7 @@ Lookup (last_cdc)
 
   ## 🥉 Bronze Layer – Incremental Loop (Multi-Table Ingestion)
 
-# This pipeline extends the incremental ingestion logic to support multiple tables using a ForEach activity.
+This pipeline extends the incremental ingestion logic to support multiple tables using a ForEach activity.
 
 ### Flow:
 ForEach (loop_input)
@@ -50,7 +50,7 @@ ForEach (loop_input)
 
   ## 🥈 Silver Layer – Streaming Transformations
 
-# The Silver layer processes raw Bronze data using Azure Databricks Structured Streaming and writes clean Delta tables.
+The Silver layer processes raw Bronze data using Azure Databricks Structured Streaming and writes clean Delta tables.
 
 ### What it does:
 - Reads data from Bronze (ADLS) using Auto Loader (`cloudFiles`)
@@ -94,7 +94,7 @@ Tables:
 
 ## 🥇 Gold Layer – Incremental + SCD Type 2
 
-# The Gold layer builds business-ready dimension tables using incremental processing and SCD Type 2 logic.
+The Gold layer builds business-ready dimension tables using incremental processing and SCD Type 2 logic.
 
 ### What Happens in This Layer
 
