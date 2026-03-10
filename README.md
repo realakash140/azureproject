@@ -1,4 +1,6 @@
-<img width="1408" height="768" alt="image" src="https://github.com/user-attachments/assets/1b82db65-2cc9-4735-b91e-fdbe2a591bf9" />
+## Architecture Diagram
+<img width="1408" height="768" alt="image" src="https://github.com/user-attachments/assets/1a8a7d88-aca4-4ce9-a68b-8099eff9ed67" />
+
 
 
 
